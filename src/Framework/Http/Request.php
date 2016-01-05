@@ -33,7 +33,7 @@ class Request
         $this->setMethod($method);
         $this->path          = $path;
         $this->setScheme($scheme);
-        $this->schemeVersion = $schemeVersion;
+        $this->setSchemeVersion($schemeVersion);
         $this->headers       = $headers;
         $this->body          = $body;
 	}
@@ -93,6 +93,24 @@ class Request
 
 	public function getSchemeVersion(){
 		return $this->schemeVersion;
+	}
+
+	public function setSchemeVersion($version){
+		$versions = [
+			self::VERSION_1_0,
+			self::VERSION_1_1,
+			self::VERSION_2_0,
+		];
+
+		if (!in_array($version, $versions)) {
+			throw new \InvalidArgumentException(sprintf(
+				"Scheme %s is not supported and must be one of %s.",
+				$version,
+				implode(', ', $versions)
+			));
+		}
+
+		$this->schemeVersion = $version;
 	}
 
 	public function getHeaders(){
