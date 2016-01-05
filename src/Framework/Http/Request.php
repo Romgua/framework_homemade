@@ -14,8 +14,13 @@ class Request
 	const TRACE   = 'TRACE';
 	const HEAD    = 'HEAD';
 	const DELETE  = 'DELETE';
+
 	const HTTP    = 'HTTP';
 	const HTTPS   = 'HTTPS';
+
+	const VERSION_1_0 = '1.0';
+	const VERSION_1_1 = '1.1';
+	const VERSION_2_0 = '2.0';
 
 	private $method;
 	private $scheme;
@@ -77,7 +82,7 @@ class Request
 
 		if (!in_array($scheme, $schemes)) {
 			throw new \InvalidArgumentException(sprintf(
-				"Method %s is not supported and must be one of %s.",
+				"Scheme %s is not supported and must be one of %s.",
 				$scheme,
 				implode(', ', $schemes)
 			));
