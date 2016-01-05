@@ -92,19 +92,42 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 		];
 	}
 
+	// ---------------- HEADER ---------------- //
+	/**
+	* @expectedException \RuntimeException
+	*/
+	public function testAddSameHttpHeaderTwice(){
+		$headers = [
+			'Content-Type' => 'text/html',
+			'CONTENT-TYPE' => 'application/json',
+		];
+
+		new Request('GET', '/', 'HTTP', '1.1', $headers);
+	}
+
+
 	// ---------------- REQUEST ---------------- //
 
 	/**
 	* @dataProvider provideRequestParameters
 	*/
 	public function testCreateRequestInstance($method, $path){
-		$request = new Request($method, $path, Request::HTTP,'1.1');
+		$request = new Request($method, $path, Request::HTTP, '1.1', [
+			'Host' => 'http://wikipedia.com',
+			'User-Agent' => 'Mozilla/Firefox',
+		]);
 
 		$this->assertSame($method, $request->getMethod());
 		$this->assertSame($path, $request->getPath());
 		$this->assertSame(Request::HTTP, $request->getScheme());
 		$this->assertSame('1.1', $request->getSchemeVersion());
-		$this->assertEmpty($request->getHeaders());
+		$this->assertCount(2, $request->getHeaders());
+		$this->assertSame(
+			[ 'host' => 'http://wikipedia.com', 'user-agent' => 'Mozilla/Firefox' ],
+			$request->getHeaders()
+		);
+		$this->assertSame('http://wikipedia.com', $request->getHeader('Host'));
+		$this->assertSame('Mozilla/Firefox', $request->getHeader('User-Agent'));
 		$this->assertEmpty($request->getBody());
 	}
 

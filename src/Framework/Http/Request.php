@@ -31,11 +31,11 @@ class Request
 
 	public function __construct($method, $path, $scheme, $schemeVersion, array $headers = array(), $body = ''){
         $this->setMethod($method);
-        $this->path          = $path;
+        $this->path = $path;
         $this->setScheme($scheme);
         $this->setSchemeVersion($schemeVersion);
-        $this->headers       = $headers;
-        $this->body          = $body;
+        $this->setHeaders($headers);
+        $this->body = $body;
 	}
 
 	public function getMethod(){
@@ -74,7 +74,7 @@ class Request
 		return $this->scheme;
 	}
 
-	public function setScheme($scheme){
+	private function setScheme($scheme){
 		$schemes = [
 			self::HTTP,
 			self::HTTPS,
@@ -95,7 +95,7 @@ class Request
 		return $this->schemeVersion;
 	}
 
-	public function setSchemeVersion($version){
+	private function setSchemeVersion($version){
 		$versions = [
 			self::VERSION_1_0,
 			self::VERSION_1_1,
@@ -115,6 +115,28 @@ class Request
 
 	public function getHeaders(){
 		return $this->headers;
+	}
+
+	public function getHeader($name){
+		$name = strtolower($name);
+
+		return isset($this->headers[$name]) ? $this->headers[$name] : null;
+	}
+
+	private function setHeaders($headers){
+		foreach ($headers as $header => $value) {
+			$header = strtolower($header);
+			
+			if (isset($this->headers[$header])) {
+				throw new \RuntimeException(sprintf(
+					"Header %s is already defined and cannot be set twice",
+					$header
+				));
+				
+			}
+
+			$this->headers[$header] = $value;
+		}
 	}
 
 	public function getBody(){
