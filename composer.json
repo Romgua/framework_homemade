@@ -1,0 +1,24 @@
+{
+    "name": "romain/framework_lpdim",
+    "description": "PHP MicroFramework",
+    "type": "library",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Romain Guarnotta",
+            "email": "guarnotta.romain@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "":"src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "":"tests/"
+        }
+    },
+    "minimum-stability": "alpha",
+    "require": {}
+}
