@@ -25,6 +25,36 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	* @expectedException \invalidArgumentException
+	* @dataProvider provideInvalidHttpScheme
+	*/
+	public function testUnsupportedHttpScheme($scheme){
+		new Request('GET', '/', $scheme, '1.1');
+	}
+
+	public function provideInvalidHttpScheme(){
+		return [
+			['FTP'],
+			['SFTP'],
+			['SSH'],
+		];
+	}
+
+	/**
+	* @dataProvider provideValidHttpScheme
+	*/
+	public function testSupportedHttpScheme($scheme){
+		new Request('GET', '/', $scheme, '1.1');
+	}
+
+	public function provideValidHttpScheme(){
+		return [
+			[ Request::HTTP ],
+			[ Request::HTTPS ],
+		];
+	}
+
+	/**
 	* @dataProvider provideRequestParameters
 	*/
 	public function testCreateRequestInstance($method, $path){
