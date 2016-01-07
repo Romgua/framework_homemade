@@ -43,6 +43,13 @@ class Request extends AbstractMessage implements RequestInterface
             static::parseBody($message)
         );
     }
+
+    public static function createFromGlobals(){
+    	$protocol = explode('/', $_SERVER['SERVER_PROTOCOL']);
+		$path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '/';
+
+		return new self($_SERVER['REQUEST_METHOD'], $path, $protocol[0], $protocol[1]);
+    }
 	
 	public function getMethod(){
 		return $this->method;
