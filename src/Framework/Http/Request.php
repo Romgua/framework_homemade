@@ -2,18 +2,8 @@
 
 namespace Framework\Http;
 
-class Request extends AbstractMessage
+class Request extends AbstractMessage implements RequestInterface
 {
-
-	const GET     = 'GET';
-	const POST    = 'POST';
-	const PUT     = 'PUT';
-	const PATCH   = 'PATCH';
-	const OPTIONS = 'OPTIONS';
-	const CONNECT = 'CONNECT';
-	const TRACE   = 'TRACE';
-	const HEAD    = 'HEAD';
-	const DELETE  = 'DELETE';
 
 	private $method;
 	private $path;
@@ -25,46 +15,34 @@ class Request extends AbstractMessage
         $this->path = $path;
 	}
 
-	public static function createFromMessage($message){
-		if (!is_string($message) || empty($message)) {
-			throw new \MalformedHttpMessageException('HTTP message is not valid.');
-		}
-
-		// 1. Parse prologue (first required line)
+	private static function parsePrologue($message){
 		$lines = explode(PHP_EOL, $message);
 		$result = preg_match('#^(?P<method>[A-Z]{3,7}) (?P<path>.+) (?P<scheme>HTTPS?)\/(?P<version>[1-2]\.[0-2])$#', $lines[0], $matches);
 		if (!$result) {
 			throw new \MalformedHttpMessageException('HTTP message prologue is malformed.');
 		}
 
-		array_shift($lines);
-
-		// 2. Parse list of headers (if any)
-		$i = 0;
-		$headers = [];
-
-		while($line = $lines[$i]) {
-			$result = preg_match('#^([a-z][a-z0-9-]+)\: (.+)$#i', $line, $header);
-			if (!$result) {
-				throw new \MalformedHttpMessageException(sprintf('Invalide header line at position %u : %s.', $i+2, $line));
-			}
-			list(, $name, $value) = $header;
-
-			$headers[$name] = $value;
-			$i++;
-		}
-
-		// 3. Parse content (if any)
-		$i++;
-		$body = '';
-
-		if (isset($lines[$i])) {
-			$body = $lines[$i];
-		}
-
-		// 4. Construct new instance of Request class with atomic data
-		return new self($matches['method'], $matches['path'], $matches['scheme'], $matches['version'], $headers, $body);
+		return $matches;
 	}
+
+	final public static function createFromMessage($message){
+        if (!is_string($message) || empty($message)) {
+            throw new MalformedHttpMessageException($message, 'HTTP message is not valid.');
+        }
+ 
+        // 1. Parse prologue (first required line)
+        $prologue = static::parsePrologue($message);
+ 
+        // 4. Construct new instance of Request class with atomic data
+        return new self(
+            $prologue['method'],
+            $prologue['path'],
+            $prologue['scheme'],
+            $prologue['version'],
+            static::parseHeaders($message),
+            static::parseBody($message)
+        );
+    }
 	
 	public function getMethod(){
 		return $this->method;
