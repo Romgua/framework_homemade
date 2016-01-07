@@ -2,7 +2,7 @@
 
 namespace Framework\Http;
 
-class Response extends AbstractMessage implements ResponseInterface
+class Response extends AbstractMessage implements ResponseInterface, StreamableInterface
 {
     private $statusCode;
 
@@ -80,6 +80,16 @@ class Response extends AbstractMessage implements ResponseInterface
         }
 
         return $matches;
+    }
+
+    public function send(){
+
+        header($this->createPrologue());
+        foreach ($this->getHeaders() as $name => $value) {
+            header($name.': '.$value);
+        }
+
+        echo $this->getBody();
     }
 }
 
