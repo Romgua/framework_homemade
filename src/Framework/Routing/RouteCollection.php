@@ -16,6 +16,12 @@ class RouteCollection implements \Iterator, \Countable
 		$this->routes = [];
 	}
 
+	public function merge(RouteCollection $routes, $override = false){
+		foreach ($routes as $name => $route) {
+			$this->add($name, $route, $override);
+		}
+	}
+
 	public function match($path){
 		foreach ($this->routes as $route) {
 			if ($route->match($path)) {
@@ -24,8 +30,8 @@ class RouteCollection implements \Iterator, \Countable
 		}
 	}
 
-	public function add($name, Route $route){
-		if (isset($this->routes[$name])) {
+	public function add($name, Route $route, $override = false){
+		if (isset($this->routes[$name]) && !$override) {
 			throw new \InvalidArgumentException(sprintf(
 				'A route already exists for the name "%s".',
 				$name
