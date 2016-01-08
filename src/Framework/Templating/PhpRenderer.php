@@ -5,30 +5,11 @@ namespace Framework\Templating;
 use Framework\Http\Response;
 use Framework\Http\ResponseInterface;
 
-class PhpRenderer implements ResponseRendererInterface
+class PhpRenderer extends AbstractRenderer
 {
-	private $directory;
-
-	public function __construct($directory){
-		if (!is_dir($directory)) {
-			throw new \InvalidArgumentException(sprintf(
-				'Directory %s does not exist.',
-				$directory
-			));
-		}
-
-		$this->directory = realpath($directory);
-	}
-
+	
 	public function render($view, array $vars = []){
-		$path = $this->directory.DIRECTORY_SEPARATOR.$view;
-		if (!is_readable($path)) {
-			throw new TemplateNotFoundException(sprintf(
-				'Template "%s" cannot be found in "%s" directory',
-				$view,
-				$this->directory
-			));
-		}
+		$path = $this->getTemplatePath($view);
 
 		if (in_array('view', $vars)) {
 			throw new \RuntimeException('The "view" template variable is a reserved keyword.');
@@ -49,10 +30,6 @@ class PhpRenderer implements ResponseRendererInterface
 		}
 
 		return htmlspecialchars($vars, ENT_QUOTES);
-	}
-
-	public function renderResponse($view, array $vars = [], $statusCode = ResponseInterface::HTTP_OK){
-		return new Response($statusCode, 'HTTP', '1.1', [], $this->render($view, $vars));
 	}
 
 }
