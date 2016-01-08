@@ -5,27 +5,27 @@ namespace Framework;
 use Framework\Http\RequestInterface;
 use Framework\Http\Response;
 use Framework\Http\ResponseInterface;
+
 use Framework\Routing\RouterInterface;
 use Framework\Routing\RequestContext;
 use Framework\Routing\RouteNotFoundException;
 use Framework\Routing\MethodNotAllowedException;
+
 use Framework\Templating\ResponseRendererInterface;
+
+use Framework\ServiceLocator\ServiceLocatorInterface;
 
 class Kernel implements KernelInterface
 {
 
-    private $router;
-	private $controllers;
-	private $renderer;
+    private $dic;
 
-	public function __construct(
-		RouterInterface $router,
-		ControllerFactoryInterface $controllers,
-		ResponseRendererInterface $renderer
-	){
-		$this->router      = $router;
-		$this->controllers = $controllers;
-		$this->renderer    = $renderer;
+	public function __construct(ServiceLocatorInterface $dic){
+		$this->dic = $dic;
+	}
+
+	private function getService($name){
+		return $this->dic->getService($name);
 	}
 
 	/**
@@ -38,7 +38,7 @@ class Kernel implements KernelInterface
 		try {
 			return $this->doHandle($request);
 		} catch (RouteNotFoundException $e) {
-			return $this->renderer->renderResponse('errors/404.php', [ 'request' => $request, 'exception' => $e ], Response::HTTP_NOT_FOUND);
+			return $this->renderer->renderResponse('errors/404.twig', [ 'request' => $request, 'exception' => $e ], Response::HTTP_NOT_FOUND);
         } catch (MethodNotAllowedException $e) {
             return $this->createResponse($request, 'Method Not Allowed', Response::HTTP_METHOD_NOT_ALLOWED);
         } catch (\Exception $e) {
@@ -47,11 +47,14 @@ class Kernel implements KernelInterface
     }
 
     private function doHandle(RequestInterface $request){
+        $router  = $this->getService('router');
+        $factory = $this->getService('controller_factory');
+        
         $context = RequestContext::createFromRequest($request);
-        $action = $this->controllers->createController($this->router->match($context));
+        $action = $factory->createController($router->match($context));
 
-        if (method_exists($action, 'setRenderer')) {
-        	$action->setRenderer($this->renderer);
+        if ($action instanceof AbstractAction) {
+        	$action->setServiceLocator($this->dic);
         }
         
         $response = call_user_func_array($action, [ $request ]);

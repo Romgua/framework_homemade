@@ -3,23 +3,15 @@
 namespace Application\Controller;
 
 use Framework\Http\RequestInterface;
-use Framework\Templating\ResponseRendererInterface;
+use Framework\AbstractAction;
 
-final class HelloWorldAction
+final class HelloWorldAction extends AbstractAction
 {
 
-	/**
-	 * The template engine.
-	 * 
-	 * @var ResponseRendererInterface
-	 */
-	private $renderer;
-
-	public function setRenderer(ResponseRendererInterface $renderer){
-		$this->renderer = $renderer;
-	}
-
 	public function __invoke(RequestInterface $request){
-		return $this->renderer->renderResponse('hello.tpl', [ 'name' => 'romain' ]);
+		return $this->render('hello.twig', [
+			'name' => 'romain'
+		 ]);
 	}
+
 }
