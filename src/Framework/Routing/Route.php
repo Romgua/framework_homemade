@@ -24,16 +24,36 @@ class Route
         return $methods;
     }
 
-	public function match($path){
-		return $path === $this->path;
-	}
+    private function getPattern(){
+    	return '#^'.preg_quote($this->path).'$#';
+    }
 
-	public function getPath(){
-		return $this->path;
+	private function executeRegexAgainst($path){
+		if (!preg_match($this->getPattern(), $path, $matches)) {
+			throw new \RuntimeException('Route does not match pattern.');
+		}
+
+		$this->parameters = array_merge($this->parameters, $matches);
+
+		return $matches;
 	}
 
 	public function getParameters(){
 		return $this->parameters;
+	}
+	
+	public function match($path){
+		try {
+			$this->executeRegexAgainst($path);
+		} catch (\Exception $e) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function getPath(){
+		return $this->path;
 	}
 
 }

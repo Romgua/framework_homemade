@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <routes>
+	<route name="homepage" path="/" method="GET">
+		<param key="_controller">Application\Controller\Blog\ListPostsAction</param>
+	</route>
+	<route name="blog" path="/blog" method="GET">
+		<param key="_controller">Application\Controller\Blog\ListPostsAction</param>
+	</route>
+	<route name="blog_post" path="/blog/article-{id:\d+}.html" method="GET">
+		<param key="_controller">Application\Controller\Blog\GetPostAction</param>
+	</route>
 	<route name="hello" path="/hello" method="GET">
 		<param key="_controller">Application\Controller\HelloWorldAction</param>
 	</route>

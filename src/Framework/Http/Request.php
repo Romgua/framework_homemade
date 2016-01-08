@@ -2,17 +2,29 @@
 
 namespace Framework\Http;
 
-class Request extends AbstractMessage implements RequestInterface
+class Request extends AbstractMessage implements RequestInterface, AttributeHolderInterface
 {
 
 	private $method;
 	private $path;
+	private $attributes;
 
+    /**
+     * Constructor.
+     *
+     * @param string $method        The HTTP verb
+     * @param string $path          The resource path on the server
+     * @param string $scheme        The protocole name (HTTP or HTTPS)
+     * @param string $schemeVersion The scheme version (ie: 1.0, 1.1 or 2.0)
+     * @param array  $headers       An associative array of headers
+     * @param string $body          The request content
+     */
 	public function __construct($method, $path, $scheme, $schemeVersion, array $headers = array(), $body = ''){
 		parent::__construct($scheme, $schemeVersion, $headers, $body);
 
         $this->setMethod($method);
         $this->path = $path;
+		$this->attributes = [];
 	}
 
 	private static function parsePrologue($message){
@@ -85,6 +97,30 @@ class Request extends AbstractMessage implements RequestInterface
 		}
 
 		$this->method = $method;
+	}
+
+	public function setAttributes(array $attributes){
+		$this->attributes = $attributes;
+	}
+
+	public function setAttribute($name, $value){
+		$this->attributes['name'] = $value;
+	}
+
+	public function getAttributes(){
+		return $this->attributes;
+	}
+
+	public function getAttribute($name, $default = null){
+		if ($this->hasAttribute($name)) {
+			return $this->attributes['name'];
+		}
+
+		return $default;
+	}
+
+	public function hasAttribute($name){
+		return isset($this->attributes['name']);
 	}
 
 }

@@ -14,6 +14,8 @@ abstract class AbstractAction
 	 */
 	private $dic;
 
+	//abstract public function __invoke(RequestInterface $request);
+
 	public function setServiceLocator(ServiceLocatorInterface $dic){
 		$this->dic = $dic;
 	}
