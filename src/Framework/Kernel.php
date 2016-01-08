@@ -9,17 +9,23 @@ use Framework\Routing\RouterInterface;
 use Framework\Routing\RequestContext;
 use Framework\Routing\RouteNotFoundException;
 use Framework\Routing\MethodNotAllowedException;
-// use Framework\ControllerFactoryInterface;
+use Framework\Templating\ResponseRendererInterface;
 
 class Kernel implements KernelInterface
 {
 
     private $router;
 	private $controllers;
+	private $renderer;
 
-	public function __construct(RouterInterface $router, ControllerFactoryInterface $controllers){
-        $this->router = $router;
+	public function __construct(
+		RouterInterface $router,
+		ControllerFactoryInterface $controllers,
+		ResponseRendererInterface $renderer
+	){
+		$this->router      = $router;
 		$this->controllers = $controllers;
+		$this->renderer    = $renderer;
 	}
 
 	/**
@@ -32,7 +38,7 @@ class Kernel implements KernelInterface
 		try {
 			return $this->doHandle($request);
 		} catch (RouteNotFoundException $e) {
-			return $this->createResponse($request, 'Page Not Found', Response::HTTP_NOT_FOUND);
+			return $this->renderer->renderResponse('errors/404.php', [ 'request' => $request, 'exception' => $e ], Response::HTTP_NOT_FOUND);
         } catch (MethodNotAllowedException $e) {
             return $this->createResponse($request, 'Method Not Allowed', Response::HTTP_METHOD_NOT_ALLOWED);
         } catch (\Exception $e) {
@@ -43,6 +49,10 @@ class Kernel implements KernelInterface
     private function doHandle(RequestInterface $request){
         $context = RequestContext::createFromRequest($request);
         $action = $this->controllers->createController($this->router->match($context));
+
+        if (method_exists($action, 'setRenderer')) {
+        	$action->setRenderer($this->renderer);
+        }
         
         $response = call_user_func_array($action, [ $request ]);
 
